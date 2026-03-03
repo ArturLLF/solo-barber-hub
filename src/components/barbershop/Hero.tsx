@@ -27,7 +27,7 @@ const Hero = () => (
           <span className="text-foreground">Barber</span>
         </h1>
         <p className="text-lg md:text-xl text-muted-foreground font-body font-light max-w-2xl mx-auto mb-10">
-          Estilo, tradição e excelência. A arte de ser cavalheiro começa aqui.
+          Corte na régua, barba na navalha e atitude no máximo.
         </p>
         <a
           href="#agendamento"
