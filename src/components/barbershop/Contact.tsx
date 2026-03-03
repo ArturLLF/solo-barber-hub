@@ -2,8 +2,8 @@ import { motion } from "framer-motion";
 import { MapPin, Phone, Clock } from "lucide-react";
 
 const info = [
-  { icon: MapPin, label: "Endereço", value: "Rua Exemplo, 123 — Centro" },
-  { icon: Phone, label: "Telefone", value: "(11) 99999-9999" },
+  { icon: MapPin, label: "Endereço", value: "Qno 15 Conj A Loja 05" },
+  { icon: Phone, label: "Telefone", value: "(61) 9698-0205" },
   { icon: Clock, label: "Horário", value: "Seg–Sáb: 09h às 19h30" },
 ];
 
