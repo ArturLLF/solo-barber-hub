@@ -2,9 +2,9 @@ import { motion } from "framer-motion";
 import { Award, Clock, Users } from "lucide-react";
 
 const stats = [
-  { icon: Clock, label: "Anos de experiência", value: "10+" },
-  { icon: Users, label: "Clientes satisfeitos", value: "5.000+" },
-  { icon: Award, label: "Profissionais", value: "4" },
+  { icon: Clock, label: "Anos de experiência", value: "3+" },
+  { icon: Users, label: "Clientes satisfeitos", value: "2.000+" },
+  { icon: Award, label: "Profissionais", value: "2" },
 ];
 
 const About = () => (
