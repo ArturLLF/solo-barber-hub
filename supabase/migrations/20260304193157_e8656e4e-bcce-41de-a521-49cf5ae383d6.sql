@@ -1,0 +1,1 @@
+ALTER TABLE public.bookings ADD COLUMN service TEXT NOT NULL DEFAULT 'Corte';
