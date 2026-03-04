@@ -29,6 +29,7 @@ const BookingSystem = () => {
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [service, setService] = useState("Corte");
   const [occupiedSlots, setOccupiedSlots] = useState<string[]>([]);
   const [confirmed, setConfirmed] = useState(false);
   const [error, setError] = useState("");
@@ -79,6 +80,7 @@ const BookingSystem = () => {
       booking_time: selectedTime,
       client_name: name.trim(),
       client_phone: phone.trim(),
+      service,
     });
     setLoading(false);
 
@@ -97,6 +99,7 @@ const BookingSystem = () => {
       setSelectedTime(null);
       setName("");
       setPhone("");
+      setService("Corte");
     }, 3000);
   }, [name, phone, selectedDate, selectedTime]);
 
@@ -215,6 +218,25 @@ const BookingSystem = () => {
                     onChange={e => setPhone(e.target.value)}
                     className="w-full bg-input border border-border rounded-sm px-4 py-3 text-sm font-body text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors"
                   />
+                  <select
+                    value={service}
+                    onChange={e => setService(e.target.value)}
+                    className="w-full bg-input border border-border rounded-sm px-4 py-3 text-sm font-body text-foreground focus:outline-none focus:border-primary transition-colors"
+                  >
+                    <option value="Corte">Corte — R$ 30</option>
+                    <option value="Navalhado">Navalhado — R$ 35</option>
+                    <option value="Corte e Barba">Corte e Barba — R$ 50</option>
+                    <option value="Barba Terapia">Barba Terapia — R$ 80</option>
+                    <option value="Platinado ou Luzes">Platinado ou Luzes — R$ 150</option>
+                    <option value="Alisamento">Alisamento — R$ 40</option>
+                    <option value="Progressiva">Progressiva — R$ 120</option>
+                    <option value="Corte Infantil">Corte Infantil — R$ 30</option>
+                    <option value="Pezinho">Pezinho — R$ 15</option>
+                    <option value="Pigmentação">Pigmentação — R$ 25</option>
+                    <option value="Sobrancelha">Sobrancelha — R$ 10</option>
+                    <option value="Limpeza de Pele">Limpeza de Pele — R$ 25</option>
+                    <option value="Cera Limpeza Geral">Cera Limpeza Geral — R$ 15</option>
+                  </select>
 
                   <AnimatePresence>
                     {error && (

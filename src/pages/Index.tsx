@@ -7,6 +7,7 @@ import BookingSystem from "@/components/barbershop/BookingSystem";
 import Contact from "@/components/barbershop/Contact";
 import Footer from "@/components/barbershop/Footer";
 import AdminPanel from "@/components/barbershop/AdminPanel";
+import WhatsAppButton from "@/components/barbershop/WhatsAppButton";
 
 const Index = () => {
   const [adminOpen, setAdminOpen] = useState(false);
@@ -46,6 +47,7 @@ const Index = () => {
       <Contact />
       <Footer />
       <AdminPanel open={adminOpen} onClose={() => setAdminOpen(false)} />
+      <WhatsAppButton />
     </div>
   );
 };

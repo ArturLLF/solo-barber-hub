@@ -22,6 +22,7 @@ export type Database = {
           client_phone: string
           created_at: string
           id: string
+          service: string
         }
         Insert: {
           booking_date: string
@@ -30,6 +31,7 @@ export type Database = {
           client_phone: string
           created_at?: string
           id?: string
+          service?: string
         }
         Update: {
           booking_date?: string
@@ -38,6 +40,7 @@ export type Database = {
           client_phone?: string
           created_at?: string
           id?: string
+          service?: string
         }
         Relationships: []
       }
