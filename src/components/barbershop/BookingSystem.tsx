@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight, Check, AlertCircle } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 /* ─── helpers ─── */
 const MONTHS = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
@@ -12,34 +13,10 @@ const generateSlots = (): string[] => {
     slots.push(`${String(h).padStart(2,"0")}:00`);
     if (h < 19 || h === 19) slots.push(`${String(h).padStart(2,"0")}:30`);
   }
-  // remove 20:00 if generated
   return slots.filter(s => s <= "19:30");
 };
 
 const TIME_SLOTS = generateSlots();
-
-const getBookings = (): Record<string, string[]> => {
-  try {
-    return JSON.parse(localStorage.getItem("barbosa_bookings") || "{}");
-  } catch { return {}; }
-};
-
-const getClientData = (): Array<{date:string;time:string;name:string;phone:string}> => {
-  try {
-    return JSON.parse(localStorage.getItem("barbosa_clients") || "[]");
-  } catch { return []; }
-};
-
-const saveBooking = (date: string, time: string, name: string, phone: string) => {
-  const bookings = getBookings();
-  if (!bookings[date]) bookings[date] = [];
-  bookings[date].push(time);
-  localStorage.setItem("barbosa_bookings", JSON.stringify(bookings));
-
-  const clients = getClientData();
-  clients.push({ date, time, name, phone });
-  localStorage.setItem("barbosa_clients", JSON.stringify(clients));
-};
 
 const dateKey = (d: Date) =>
   `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
@@ -52,13 +29,23 @@ const BookingSystem = () => {
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
-  const [bookings, setBookings] = useState<Record<string, string[]>>(getBookings);
+  const [occupiedSlots, setOccupiedSlots] = useState<string[]>([]);
   const [confirmed, setConfirmed] = useState(false);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
+  // Fetch occupied slots for selected date
   useEffect(() => {
-    setBookings(getBookings());
-  }, [selectedDate]);
+    if (!selectedDate) { setOccupiedSlots([]); return; }
+    const fetchSlots = async () => {
+      const { data } = await supabase
+        .from("bookings")
+        .select("booking_time")
+        .eq("booking_date", selectedDate);
+      setOccupiedSlots(data?.map(b => b.booking_time) || []);
+    };
+    fetchSlots();
+  }, [selectedDate, confirmed]);
 
   /* calendar grid */
   const firstDay = new Date(viewYear, viewMonth, 1).getDay();
@@ -75,19 +62,35 @@ const BookingSystem = () => {
 
   const isDaySelectable = (day: number) => {
     const d = new Date(viewYear, viewMonth, day);
-    if (d.getDay() === 0) return false; // sunday
+    if (d.getDay() === 0) return false;
     const t = new Date(); t.setHours(0,0,0,0);
     return d >= t;
   };
 
-  const handleConfirm = useCallback(() => {
+  const handleConfirm = useCallback(async () => {
     setError("");
     if (!name.trim()) { setError("Preencha seu nome."); return; }
     if (!phone.trim() || phone.length < 8) { setError("Preencha um telefone válido."); return; }
     if (!selectedDate || !selectedTime) { setError("Selecione data e horário."); return; }
 
-    saveBooking(selectedDate, selectedTime, name.trim(), phone.trim());
-    setBookings(getBookings());
+    setLoading(true);
+    const { error: insertError } = await supabase.from("bookings").insert({
+      booking_date: selectedDate,
+      booking_time: selectedTime,
+      client_name: name.trim(),
+      client_phone: phone.trim(),
+    });
+    setLoading(false);
+
+    if (insertError) {
+      if (insertError.code === "23505") {
+        setError("Este horário já foi reservado. Escolha outro.");
+      } else {
+        setError("Erro ao agendar. Tente novamente.");
+      }
+      return;
+    }
+
     setConfirmed(true);
     setTimeout(() => {
       setConfirmed(false);
@@ -96,8 +99,6 @@ const BookingSystem = () => {
       setPhone("");
     }, 3000);
   }, [name, phone, selectedDate, selectedTime]);
-
-  const occupiedSlots = selectedDate ? (bookings[selectedDate] || []) : [];
 
   return (
     <section id="agendamento" className="py-24 bg-surface">
@@ -225,10 +226,10 @@ const BookingSystem = () => {
 
                   <button
                     onClick={handleConfirm}
-                    disabled={!selectedTime}
+                    disabled={!selectedTime || loading}
                     className="w-full gold-gradient text-primary-foreground font-body font-semibold py-3 rounded-sm uppercase tracking-wider text-sm disabled:opacity-40 hover:opacity-90 transition-opacity"
                   >
-                    Confirmar Agendamento
+                    {loading ? "Agendando..." : "Confirmar Agendamento"}
                   </button>
 
                   <AnimatePresence>

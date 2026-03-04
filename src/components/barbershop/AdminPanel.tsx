@@ -1,54 +1,61 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Trash2, AlertTriangle } from "lucide-react";
+import { X, Trash2, AlertTriangle, RefreshCw } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface AdminPanelProps {
   open: boolean;
   onClose: () => void;
 }
 
-type ClientEntry = { date: string; time: string; name: string; phone: string };
+type BookingEntry = {
+  id: string;
+  booking_date: string;
+  booking_time: string;
+  client_name: string;
+  client_phone: string;
+};
 
 const AdminPanel = ({ open, onClose }: AdminPanelProps) => {
   const [authed, setAuthed] = useState(false);
   const [password, setPassword] = useState("");
-  const [clients, setClients] = useState<ClientEntry[]>([]);
+  const [bookings, setBookings] = useState<BookingEntry[]>([]);
   const [pwError, setPwError] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const loadData = () => {
-    try {
-      setClients(JSON.parse(localStorage.getItem("barbosa_clients") || "[]"));
-    } catch { setClients([]); }
+  const loadData = async () => {
+    setLoading(true);
+    const { data } = await supabase
+      .from("bookings")
+      .select("*")
+      .order("booking_date", { ascending: true })
+      .order("booking_time", { ascending: true });
+    setBookings(data || []);
+    setLoading(false);
   };
 
   useEffect(() => {
-    if (open) loadData();
+    if (open && authed) loadData();
     if (!open) { setAuthed(false); setPassword(""); setPwError(false); }
-  }, [open]);
+  }, [open, authed]);
 
   const handleLogin = () => {
     if (password === "admin123") { setAuthed(true); setPwError(false); }
     else setPwError(true);
   };
 
-  const removeEntry = (index: number) => {
-    const updated = [...clients];
-    const removed = updated.splice(index, 1)[0];
-    setClients(updated);
-    localStorage.setItem("barbosa_clients", JSON.stringify(updated));
-    // also remove from bookings
-    const bookings = JSON.parse(localStorage.getItem("barbosa_bookings") || "{}");
-    if (bookings[removed.date]) {
-      bookings[removed.date] = bookings[removed.date].filter((t: string) => t !== removed.time);
-      if (bookings[removed.date].length === 0) delete bookings[removed.date];
-      localStorage.setItem("barbosa_bookings", JSON.stringify(bookings));
-    }
+  const removeEntry = async (id: string) => {
+    await supabase.from("bookings").delete().eq("id", id);
+    setBookings(prev => prev.filter(b => b.id !== id));
   };
 
-  const clearAll = () => {
-    localStorage.removeItem("barbosa_bookings");
-    localStorage.removeItem("barbosa_clients");
-    setClients([]);
+  const clearAll = async () => {
+    // Delete all bookings
+    const ids = bookings.map(b => b.id);
+    if (ids.length > 0) {
+      await supabase.from("bookings").delete().in("id", ids);
+    }
+    setBookings([]);
   };
 
   return (
@@ -97,22 +104,27 @@ const AdminPanel = ({ open, onClose }: AdminPanelProps) => {
               ) : (
                 <>
                   <div className="flex items-center justify-between mb-4">
-                    <p className="text-sm text-muted-foreground font-body">{clients.length} agendamento(s)</p>
-                    <button onClick={clearAll} className="text-destructive text-xs font-body flex items-center gap-1 hover:underline">
-                      <Trash2 className="w-3 h-3" /> Limpar tudo
-                    </button>
+                    <p className="text-sm text-muted-foreground font-body">{bookings.length} agendamento(s)</p>
+                    <div className="flex items-center gap-3">
+                      <button onClick={loadData} className="text-muted-foreground text-xs font-body flex items-center gap-1 hover:text-primary transition-colors">
+                        <RefreshCw className={`w-3 h-3 ${loading ? "animate-spin" : ""}`} /> Atualizar
+                      </button>
+                      <button onClick={clearAll} className="text-destructive text-xs font-body flex items-center gap-1 hover:underline">
+                        <Trash2 className="w-3 h-3" /> Limpar tudo
+                      </button>
+                    </div>
                   </div>
-                  {clients.length === 0 ? (
+                  {bookings.length === 0 ? (
                     <p className="text-center text-muted-foreground font-body py-8">Nenhum agendamento.</p>
                   ) : (
                     <div className="space-y-2">
-                      {clients.map((c, i) => (
-                        <div key={i} className="flex items-center justify-between bg-surface-hover rounded-sm px-4 py-3">
+                      {bookings.map(b => (
+                        <div key={b.id} className="flex items-center justify-between bg-surface-hover rounded-sm px-4 py-3">
                           <div>
-                            <p className="text-sm font-body font-medium text-foreground">{c.name} — {c.phone}</p>
-                            <p className="text-xs text-muted-foreground font-body">{c.date} às {c.time}</p>
+                            <p className="text-sm font-body font-medium text-foreground">{b.client_name} — {b.client_phone}</p>
+                            <p className="text-xs text-muted-foreground font-body">{b.booking_date} às {b.booking_time}</p>
                           </div>
-                          <button onClick={() => removeEntry(i)} className="text-destructive hover:text-destructive/80 transition-colors">
+                          <button onClick={() => removeEntry(b.id)} className="text-destructive hover:text-destructive/80 transition-colors">
                             <Trash2 className="w-4 h-4" />
                           </button>
                         </div>
