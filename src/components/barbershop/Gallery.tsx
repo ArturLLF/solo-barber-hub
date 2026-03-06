@@ -1,7 +1,11 @@
-import { useState } from "react";
-import { Camera } from "lucide-react";
+import foto1 from "@/assets/foto1barber.jpeg";
+import foto2 from "@/assets/foto2barber.jpeg";
+import foto3 from "@/assets/foto3barber.jpeg";
+import foto4 from "@/assets/foto4barber.png";
+import foto5 from "@/assets/foto5barber.png";
+import foto6 from "@/assets/foto6barber.png";
 
-const placeholders = Array.from({ length: 6 }, (_, i) => i + 1);
+const photos = [foto1, foto2, foto3, foto4, foto5, foto6];
 
 const Gallery = () => {
   return (
@@ -17,15 +21,17 @@ const Gallery = () => {
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 max-w-4xl mx-auto">
-          {placeholders.map((num) => (
+          {photos.map((src, i) => (
             <div
-              key={num}
-              className="aspect-square rounded-sm overflow-hidden border border-border bg-muted/30 flex items-center justify-center group hover:border-primary/50 transition-colors"
+              key={i}
+              className="aspect-square rounded-sm overflow-hidden border border-border hover:border-primary/50 transition-colors"
             >
-              <div className="flex flex-col items-center gap-2 text-muted-foreground/50">
-                <Camera className="w-8 h-8" />
-                <span className="text-xs font-body">Foto {num}</span>
-              </div>
+              <img
+                src={src}
+                alt={`Cliente ${i + 1}`}
+                className="w-full h-full object-cover"
+                loading="lazy"
+              />
             </div>
           ))}
         </div>

@@ -3,11 +3,13 @@ import { motion } from "framer-motion";
 import { Menu, X, Scissors } from "lucide-react";
 
 const navItems = [
-{ label: "Início", href: "#inicio" },
-{ label: "Sobre", href: "#sobre" },
-{ label: "Serviços", href: "#servicos" },
-{ label: "Agendamento", href: "#agendamento" },
-{ label: "Contato", href: "#contato" }];
+  { label: "Início", href: "#inicio" },
+  { label: "Sobre", href: "#sobre" },
+  { label: "Serviços", href: "#servicos" },
+  { label: "Galeria", href: "#galeria" },
+  { label: "Agendamento", href: "#agendamento" },
+  { label: "Contato", href: "#contato" },
+];
 
 
 interface HeaderProps {
