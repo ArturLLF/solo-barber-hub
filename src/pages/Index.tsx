@@ -3,6 +3,7 @@ import Header from "@/components/barbershop/Header";
 import Hero from "@/components/barbershop/Hero";
 import About from "@/components/barbershop/About";
 import Services from "@/components/barbershop/Services";
+import Gallery from "@/components/barbershop/Gallery";
 import BookingSystem from "@/components/barbershop/BookingSystem";
 import Contact from "@/components/barbershop/Contact";
 import Footer from "@/components/barbershop/Footer";
