@@ -181,18 +181,28 @@ const BookingSystem = () => {
                 <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 mb-6 max-h-48 overflow-y-auto pr-1">
                   {TIME_SLOTS.map(slot => {
                     const occupied = occupiedSlots.includes(slot);
+                    const isToday = selectedDate === dateKey(today);
+                    const isPastSlot = isToday && (() => {
+                      const [h, m] = slot.split(":").map(Number);
+                      const slotMinutes = h * 60 + m;
+                      const nowMinutes = new Date().getHours() * 60 + new Date().getMinutes();
+                      return slotMinutes < nowMinutes + 60; // 60-min buffer
+                    })();
+                    const disabled = occupied || isPastSlot;
                     const isSelected = selectedTime === slot;
                     return (
                       <button
                         key={slot}
-                        disabled={occupied}
+                        disabled={disabled}
                         onClick={() => setSelectedTime(slot)}
                         className={`py-2 px-1 rounded-sm text-sm font-body font-medium transition-all border
                           ${occupied
                             ? "bg-destructive/20 text-destructive border-destructive/30 cursor-not-allowed line-through"
-                            : isSelected
-                              ? "gold-gradient text-primary-foreground border-transparent font-bold"
-                              : "border-border text-foreground hover:border-primary/50 cursor-pointer bg-surface-hover"
+                            : isPastSlot
+                              ? "bg-muted/30 text-muted-foreground/40 border-border/30 cursor-not-allowed"
+                              : isSelected
+                                ? "gold-gradient text-primary-foreground border-transparent font-bold"
+                                : "border-border text-foreground hover:border-primary/50 cursor-pointer bg-surface-hover"
                           }
                         `}
                       >
